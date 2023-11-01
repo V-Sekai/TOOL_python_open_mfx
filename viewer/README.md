@@ -5,6 +5,14 @@ A very simple GUI based on [Python3dViewer](https://github.com/eliemichel/Python
 
 ![Screenshot](doc/screenshot.png)
 
+## How to install
+
+1. Install micromamba
+2. micromamba create -n open_mfx
+2. micromamba activate -n open_mfx
+3. micromamba install python=3.10 -c conda-forge
+4. python3 main.py  
+
 License
 -------
 

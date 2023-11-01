@@ -2,4 +2,5 @@ numpy
 glfw
 moderngl
 scipy
-imgui[glfw]
+imgui[sdl2]
+PyWavefront

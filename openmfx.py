@@ -701,6 +701,8 @@ class OfxPluginLibrary:
             kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
             kernel32.FreeLibrary.argtypes = [ctypes.wintypes.HMODULE]
             kernel32.FreeLibrary(handle)
+        elif sys.platform == "darwin":
+            _ctypes.FreeLibrary(handle)
         else:
             libdl = ctypes.cdll.LoadLibrary('libdl.so')
             libdl.dlclose(handle)

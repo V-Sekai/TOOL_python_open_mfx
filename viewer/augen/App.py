@@ -31,14 +31,18 @@ class App:
 
         if not glfw.init():
             return
-        
+        glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 4)
+        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 1)
+        glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, True)
+        glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+
         self.window = glfw.create_window(width, height, title, None, None)
         if not self.window:
             glfw.terminate()
             return
 
         glfw.make_context_current(self.window)
-        self.ctx = moderngl.create_context(require=460)
+        self.ctx = moderngl.create_context(require=410)
 
         self.impl = ImguiRenderer(self.window, attach_callbacks=False)
         

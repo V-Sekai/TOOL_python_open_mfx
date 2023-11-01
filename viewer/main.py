@@ -1,14 +1,14 @@
 # This file is part of Python 3D Viewer
 #
 # Copyright (c) 2020 -- Élie Michel <elie.michel@exppad.com>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
 # deal in the Software without restriction, including without limitation the
 # rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
 # sell copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
@@ -32,9 +32,16 @@ from augen.mesh import ObjMesh, RenderedMesh, Mesh
 # Add project root to module path
 import sys
 from os.path import realpath, dirname
+
 sys.path.append(dirname(dirname(realpath(__file__))))
 
-from openmfx import OfxHost, OfxPluginLibrary, OfxMeshEffectInternal, OfxMeshEffect, OfxMeshInternal
+from openmfx import (
+    OfxHost,
+    OfxPluginLibrary,
+    OfxMeshEffectInternal,
+    OfxMeshEffect,
+    OfxMeshInternal,
+)
 from openmfx import constants as kOfx
 
 import ctypes
@@ -59,6 +66,7 @@ default_param_value = {
     kOfx.ParamTypePushButton: 0,
 }
 
+
 class MyApp(App):
     def init(self):
         ctx = self.ctx
@@ -80,7 +88,9 @@ class MyApp(App):
 
         # Initialize some value used in the UI
         self.some_slider = 0.42
-        self.plugin_library_path = r"E:\SourceCode\MfxExamples\build\Release\mfx_examples.ofx"
+        self.plugin_library_path = (
+            r"E:\SourceCode\MfxExamples\build\Release\mfx_examples.ofx"
+        )
 
         # OpenMfx
         self.host = OfxHost()
@@ -150,10 +160,7 @@ class MyApp(App):
 
     def ui_main_menu(self):
         if imgui.begin_menu("File", True):
-
-            clicked_quit, selected_quit = imgui.menu_item(
-                "Quit", 'Esc', False, True
-            )
+            clicked_quit, selected_quit = imgui.menu_item("Quit", "Esc", False, True)
 
             if clicked_quit:
                 self.should_close()
@@ -165,7 +172,9 @@ class MyApp(App):
             print("Browse...")
         imgui.same_line()
         changed, self.plugin_library_path = imgui.input_text(
-            "Path", self.plugin_library_path, 1024,
+            "Path",
+            self.plugin_library_path,
+            1024,
         )
 
         if imgui.button("Load"):
@@ -187,7 +196,7 @@ class MyApp(App):
         for i in range(n):
             plugin = self.lib.OfxGetPlugin(i)
             ident = plugin.pluginIdentifier.decode()
-            #imgui.bullet_text(f"{ident}")
+            # imgui.bullet_text(f"{ident}")
             all_idents.append(ident)
 
         clicked, new_current_plugin_index = imgui.listbox(
@@ -242,7 +251,7 @@ class MyApp(App):
         if self.instance is None:
             imgui.text("Load and describe a plugin to be able to create an instance...")
             return
-        
+
         imgui.text("Parameters:")
         py_instance = self.instance.internal
         self.parameter_changed = False
@@ -251,7 +260,7 @@ class MyApp(App):
             if param.type == kOfx.ParamTypeInteger:
                 changed, param.value[0] = imgui.drag_int(label, param.value[0])
             elif param.type == kOfx.ParamTypeDouble:
-                #imgui.slider_float(param.name, param.value, min_value, max_value)
+                # imgui.slider_float(param.name, param.value, min_value, max_value)
                 changed, param.value = imgui.drag_float(label, param.value)
             elif param.type == kOfx.ParamTypeBoolean:
                 changed, param.value = imgui.checkbox(label, param.value)
@@ -311,7 +320,9 @@ class MyApp(App):
     def describe_plugin(self):
         py_descriptor = OfxMeshEffectInternal()
         self.descriptor = OfxMeshEffect(py_descriptor)
-        status = self.plugin.mainEntry(kOfx.ActionDescribe, byref(self.descriptor), None, None)
+        status = self.plugin.mainEntry(
+            kOfx.ActionDescribe, byref(self.descriptor), None, None
+        )
         if status != kOfx.StatOK:
             print(f"Could not describe effect: {status}")
             self.descriptor = None
@@ -319,7 +330,9 @@ class MyApp(App):
     def destroy_instance(self):
         if self.instance is None:
             return
-        status = self.plugin.mainEntry(kOfx.ActionDestroyInstance, byref(self.instance), None, None)
+        status = self.plugin.mainEntry(
+            kOfx.ActionDestroyInstance, byref(self.instance), None, None
+        )
         print(f"OfxActionCreateInstance status = {status}")
         self.instance = None
 
@@ -337,7 +350,9 @@ class MyApp(App):
                 param.value = deepcopy(default_param_value[param.type])
 
         self.instance = OfxMeshEffect(py_instance)
-        status = self.plugin.mainEntry(kOfx.ActionCreateInstance, byref(self.instance), None, None)
+        status = self.plugin.mainEntry(
+            kOfx.ActionCreateInstance, byref(self.instance), None, None
+        )
         if status != kOfx.StatOK:
             print(f"Could not create effect instance: {status}")
             self.instance = None
@@ -358,21 +373,31 @@ class MyApp(App):
         py_instance = self.instance.internal
         py_instance.inputs[kOfx.MeshMainInput].mesh = self.input_mesh
 
-        status = self.plugin.mainEntry(kOfx.MeshEffectActionCook, byref(self.instance), None, None)
+        status = self.plugin.mainEntry(
+            kOfx.MeshEffectActionCook, byref(self.instance), None, None
+        )
         print(f"OfxActionCook status = {status}")
 
         output_mesh = py_instance.inputs[kOfx.MeshMainOutput].mesh
         py_instance.inputs[kOfx.MeshMainOutput].mesh = OfxMeshInternal()
 
         # TODO: optimize this
-        print(f"Output mesh: {output_mesh.point_count} points, {output_mesh.corner_count} corners and {output_mesh.face_count} faces")
+        print(
+            f"Output mesh: {output_mesh.point_count} points, {output_mesh.corner_count} corners and {output_mesh.face_count} faces"
+        )
         P = np.empty((output_mesh.corner_count, 3), dtype=float)
         N = np.empty((output_mesh.corner_count, 3), dtype=float)
-        point_attr = output_mesh.attributes[kOfx.MeshAttribPoint][kOfx.MeshAttribPointPosition]
-        corner_attr = output_mesh.attributes[kOfx.MeshAttribCorner][kOfx.MeshAttribCornerPoint]
-        point_attr_data = ctypes.cast(point_attr.data, ctypes.POINTER(ctypes.c_float * 3))
+        point_attr = output_mesh.attributes[kOfx.MeshAttribPoint][
+            kOfx.MeshAttribPointPosition
+        ]
+        corner_attr = output_mesh.attributes[kOfx.MeshAttribCorner][
+            kOfx.MeshAttribCornerPoint
+        ]
+        point_attr_data = ctypes.cast(
+            point_attr.data, ctypes.POINTER(ctypes.c_float * 3)
+        )
         corner_attr_data = ctypes.cast(corner_attr.data, ctypes.POINTER(ctypes.c_int))
-        assert(output_mesh.corner_count >= 3 * output_mesh.face_count)
+        assert output_mesh.corner_count >= 3 * output_mesh.face_count
         for f in range(output_mesh.face_count):
             for c in range(3):
                 index = corner_attr_data[3 * f + c]
@@ -407,10 +432,11 @@ class MyApp(App):
 
         self.input_mesh = mesh
 
+
 def main():
     app = MyApp(1280, 720, "OpenMfx Playground - Elie Michel")
     app.main_loop()
 
+
 if __name__ == "__main__":
     main()
-
